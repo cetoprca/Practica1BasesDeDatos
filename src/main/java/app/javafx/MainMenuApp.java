@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 
-public class MainApp extends Application {
+public class MainMenuApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         File fxmlFile = new File("src/main/resources/fxml/mainMenu.fxml");
