@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -31,6 +32,9 @@ public class VisorCitasController {
     TextField addressTf;
     @FXML
     TextField telephoneTf;
+
+    @FXML
+    DatePicker datePicker;
 
     @FXML
     ChoiceBox<String> specialtyCb;
@@ -59,19 +63,22 @@ public class VisorCitasController {
 
     List<Specialty> specialties = getSpecialties();
 
+    HashMap<String, Integer> specialtyIds = new HashMap<>();
+
     List<Appoint> appoints = new ArrayList<>();
 
     ObservableList<Appoint> appointsTable = FXCollections.observableList(appoints);
 
     @FXML
     private void initialize(){
-        List<String> specialtyNames = new ArrayList<>();
+        ObservableList<String> specialtyNames = FXCollections.observableList(new ArrayList<>());
+
         for (Specialty specialty : specialties){
             specialtyNames.add(specialty.especialidad.get());
+            specialtyIds.put(specialty.especialidad.get(), specialty.id.get());
         }
-        ObservableList<String> specialtiesCb = FXCollections.observableList(specialtyNames);
 
-        specialtyCb.setItems(specialtiesCb);
+        specialtyCb.setItems(specialtyNames);
 
         patientAppointsTv.setItems(appointsTable);
         appointNumTc.setCellValueFactory(data -> data.getValue().numCita.asString());
@@ -105,10 +112,30 @@ public class VisorCitasController {
     }
     @FXML
     private void deleteAppoint(){
+        int index = patientAppointsTv.getFocusModel().getFocusedItem().numCita.get();
 
+        MySQL mySQL = MySQL.getInstance("localhost", "3306", "root", "toor", "P1DBCESAR");
+        Connection mySQLConnection = mySQL.getConnection();
+
+        mySQL.execute(mySQLConnection, "DELETE FROM CITA WHERE idCita = " + index);
+
+        seePatientAppoints();
     }
     @FXML
-    private void uploadAppoint(){}
+    private void uploadAppoint(){
+        MySQL mySQL = MySQL.getInstance("localhost", "3306", "root", "toor", "P1DBCESAR");
+        Connection mySQLConnection = mySQL.getConnection();
+
+        Patient patient = getPatient(dniTf.getText());
+        Specialty specialty = null;
+        if (specialtyCb.getValue() != null){
+            specialty = new Specialty(specialtyIds.get(specialtyCb.getValue()), specialtyCb.getValue());
+        }
+
+        if (patient != null && specialty != null && datePicker.getValue() != null){
+            mySQL.execute(mySQLConnection, "INSERT INTO CITA(idPaciente, idEspecialidad, fecha) VALUES(" + patient.id + ", " + specialty.id.get() + ", '" + datePicker.getValue() + "')");
+        }
+    }
 
     @FXML
     private void checkKey(KeyEvent event){
@@ -118,8 +145,8 @@ public class VisorCitasController {
     }
 
     private int getMaxAppointNum(){
-        MySQL mySQL = new MySQL();
-        Connection mySQLConnection = mySQL.getConnection("localhost", "3306", "root", "toor", "P1DBCESAR");
+        MySQL mySQL = MySQL.getInstance("localhost", "3306", "root", "toor", "P1DBCESAR");
+        Connection mySQLConnection = mySQL.getConnection();
         ResultSet resultSet = mySQL.executeQuery(mySQLConnection, "SELECT MAX(IDCITA) FROM CITA");
         int appointNum;
         try {
@@ -143,14 +170,14 @@ public class VisorCitasController {
     }
 
     private Patient getPatient(String dni){
-        MySQL mySQL = new MySQL();
-        Connection mySQLConnection = mySQL.getConnection("localhost", "3306", "root", "toor", "P1DBCESAR");
-        ResultSet resultSet = mySQL.executeQuery(mySQLConnection, "SELECT NOMBRE, DIRECCION, TELEFONO FROM PACIENTE WHERE DNI = '" + dni + "'");
+        MySQL mySQL = MySQL.getInstance("localhost", "3306", "root", "toor", "P1DBCESAR");
+        Connection mySQLConnection = mySQL.getConnection();
+        ResultSet resultSet = mySQL.executeQuery(mySQLConnection, "SELECT * FROM PACIENTE WHERE DNI = '" + dni + "'");
 
         Patient patient;
         try {
             resultSet.next();
-            patient = new Patient(resultSet.getString(1), resultSet.getString(2), String.valueOf(resultSet.getInt(3)));
+            patient = new Patient(resultSet.getInt(1), resultSet.getString(3), resultSet.getString(4), String.valueOf(resultSet.getInt(5)));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -161,8 +188,8 @@ public class VisorCitasController {
     private List<Appoint> getPatientAppoints(String dni){
         List<Appoint> appointList = new ArrayList<>();
 
-        MySQL mySQL = new MySQL();
-        Connection mySQLConnection = mySQL.getConnection("localhost", "3306", "root", "toor", "P1DBCESAR");
+        MySQL mySQL = MySQL.getInstance("localhost", "3306", "root", "toor", "P1DBCESAR");
+        Connection mySQLConnection = mySQL.getConnection();
         ResultSet result = mySQL.executeQuery(mySQLConnection, "SELECT * FROM CITA WHERE idPaciente = (SELECT idPaciente FROM PACIENTE WHERE DNI = '" + dni + "')");
 
         try {
@@ -179,8 +206,8 @@ public class VisorCitasController {
     private List<Specialty> getSpecialties(){
         List<Specialty> specialtyList = new ArrayList<>();
 
-        MySQL mySQL = new MySQL();
-        Connection mySQLConnection = mySQL.getConnection("localhost", "3306", "root", "toor", "P1DBCESAR");
+        MySQL mySQL = MySQL.getInstance("localhost", "3306", "root", "toor", "P1DBCESAR");
+        Connection mySQLConnection = mySQL.getConnection();
         ResultSet result = mySQL.executeQuery(mySQLConnection, "SELECT * FROM ESPECIALIDAD");
 
         try {

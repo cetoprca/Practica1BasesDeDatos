@@ -1,32 +1,49 @@
 package app.database;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class MySQL {
-    public Connection getConnection(String host, String port, String user, String password){
-        Connection connection;
+
+    private static MySQL instance; // Única instancia de la clase
+    private Connection connection; // Conexión única
+
+    // Datos de conexión (puedes parametrizarlos o cargarlos de un config)
+    private String host;
+    private String port;
+    private String user;
+    private String password;
+    private String dbName;
+
+    // Constructor privado → evita instanciar la clase directamente
+    private MySQL(String host, String port, String user, String password, String dbName) {
+        this.host = host;
+        this.port = port;
+        this.user = user;
+        this.password = password;
+        this.dbName = dbName;
+
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "?serverTimezone=UTC", user, password);
+            String url = "jdbc:mysql://" + host + ":" + port;
+            if (dbName != null && !dbName.isEmpty()) {
+                url += "/" + dbName;
+            }
+            url += "?serverTimezone=UTC";
 
-        }catch (SQLException e){
-            throw new RuntimeException(e.getMessage());
+            this.connection = DriverManager.getConnection(url, user, password);
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error al conectar con la base de datos: " + e.getMessage());
         }
-
-        return connection;
     }
 
-    public Connection getConnection(String host, String port, String user, String password, String nameDB){
-        Connection connection;
-        try {
-            connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + nameDB + "?serverTimezone=UTC", user, password);
-
-        }catch (SQLException e){
-            throw new RuntimeException(e.getMessage());
+    public static MySQL getInstance(String host, String port, String user, String password, String dbName) {
+        if (instance == null) {
+            instance = new MySQL(host, port, user, password, dbName);
         }
+        return instance;
+    }
 
+    public Connection getConnection(){
         return connection;
     }
 

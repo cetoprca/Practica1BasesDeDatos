@@ -1,7 +1,6 @@
 package app;
 
 import app.database.MySQL;
-import app.javafx.MainMenuApp;
 import app.javafx.VisorCitasApp;
 
 import java.sql.Connection;
@@ -17,8 +16,8 @@ public class LaunchApp {
     }
 
     private static void forceInitDatabase(){
-        MySQL mySQL = new MySQL();
-        Connection mySQLConnection = mySQL.getConnection("localhost", "3306", "root", "toor");
+        MySQL mySQL = MySQL.getInstance("localhost", "3306", "root", "toor", "");
+        Connection mySQLConnection = mySQL.getConnection();
 
         mySQL.execute(mySQLConnection, "DROP DATABASE P1DBCESAR");
 
@@ -26,8 +25,8 @@ public class LaunchApp {
     }
 
     private static void initDatabase(){
-        MySQL mySQL = new MySQL();
-        Connection mySQLConnection = mySQL.getConnection("localhost", "3306", "root", "toor");
+        MySQL mySQL = MySQL.getInstance("localhost", "3306", "root", "toor", "");
+        Connection mySQLConnection = mySQL.getConnection();
 
         mySQL.execute(mySQLConnection, "CREATE DATABASE IF NOT EXISTS P1DBCESAR");
         mySQL.execute(mySQLConnection, "USE P1DBCESAR");
@@ -51,6 +50,12 @@ public class LaunchApp {
         mySQL.execute(mySQLConnection, "INSERT INTO ESPECIALIDAD VALUES(5, 'Alergologia')");
 
         mySQL.execute(mySQLConnection, "INSERT INTO CITA(idPaciente, idEspecialidad, fecha) VALUES(1, 5, '2025-09-22')");
+        mySQL.execute(mySQLConnection, "INSERT INTO CITA(idPaciente, idEspecialidad, fecha) VALUES(1, 5, '2025-09-22')");
+        mySQL.execute(mySQLConnection, "INSERT INTO CITA(idPaciente, idEspecialidad, fecha) VALUES(2, 5, '2025-09-22')");
+        mySQL.execute(mySQLConnection, "INSERT INTO CITA(idPaciente, idEspecialidad, fecha) VALUES(2, 5, '2025-09-22')");
+        mySQL.execute(mySQLConnection, "INSERT INTO CITA(idPaciente, idEspecialidad, fecha) VALUES(3, 5, '2025-09-22')");
+        mySQL.execute(mySQLConnection, "INSERT INTO CITA(idPaciente, idEspecialidad, fecha) VALUES(3, 5, '2025-09-22')");
+
 
     }
 }

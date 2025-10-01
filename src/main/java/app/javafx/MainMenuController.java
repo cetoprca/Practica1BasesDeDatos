@@ -26,7 +26,6 @@ public class MainMenuController {
     @FXML
     RadioButton showPasswordRbut;
 
-
     @FXML
     private void initialize(){
         passwordTf.setVisible(false);
@@ -41,8 +40,8 @@ public class MainMenuController {
         String password = passwordPf.getText();
         boolean correct = false;
 
-        MySQL mySQL = new MySQL();
-        Connection mySQLConnection = mySQL.getConnection("localhost", "3306", "root", "toor", "p1dbcesar");
+        MySQL mySQL = MySQL.getInstance("localhost", "3306", "root", "toor", "P1DBCESAR");
+        Connection mySQLConnection = mySQL.getConnection();
         ResultSet result = mySQL.executeQuery(mySQLConnection, "SELECT (COUNT(*) > 0) FROM USUARIO WHERE email = '" + email + "' AND password = '" + password + "'");
         try {
             while (result.next()){
